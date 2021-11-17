@@ -1,1 +1,4 @@
 .ipynb_checkpoints/
+.models/test_tune/
+.models/__pycache__/
+.__pycache__/
