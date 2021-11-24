@@ -25,7 +25,8 @@ class BaseTCNHyperModel(HyperModel):
             padding='causal', 
             return_sequences=True,
             use_skip_connections=True,
-            use_batch_norm=True
+            use_batch_norm=True,
+            name="tcn_layer"
         )(input_layer)
 
         # Define an output for each class
@@ -60,17 +61,17 @@ class TCNHyperModel(HyperModel):
         self.weights = weights
     
     def build(self, hp):
-
         # Define the layers
         input_layer = Input(shape=(None, self.input_shape[-1]), name='input_layer')
         tcn_layer = TCN(
-            hp.Int('nb_filters', min_value=16, max_value=512, step=16, sampling='linear'),
-            hp.Int('kernel_size', min_value=3, max_value=7, step=2, sampling='linear'),
-            nb_stacks=1,
-            dilations=(1, 2, 4, 8, 16, 32),
+            nb_filters=hp.Int('nb_filters', min_value=32, max_value=512, step=32),
+            kernel_size=hp.Int('kernel_size', min_value=3, max_value=7, step=2),
             padding='causal', 
+            dilations=(1, 2, 4, 8, 16, 32),
+            return_sequences=True,
             use_skip_connections=True,
-            use_batch_norm=True
+            use_batch_norm=True,
+            name="tcn_layer"
         )(input_layer)
 
         # Define an output for each class

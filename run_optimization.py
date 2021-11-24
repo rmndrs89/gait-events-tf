@@ -23,6 +23,26 @@ def run_optimization():
     # Get hypermodel
     hypermodel = TCNHyperModel(input_shape=x_train.shape[1:], n_classes=NUM_CLASSES)
 
+    # Define a tuner
+    tuner = kt.RandomSearch(
+        hypermodel,
+        objective="val_loss",
+        max_trials=3,
+        executions_per_trial=2,
+        overwrite=False,
+        directory=".\\optimization",
+        project_name='optim',
+    )
+
+    # Start search
+    tuner.search(x_train, y_train, epochs=2, validation_data=(x_val, y_val))
+
+    # Query the results
+    hps = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters
+    best_model = tuner.hypermodel.build(hps)
+    best_model.summary()
+    return best_model
+
 def run_baseline_optimization():
 
     # Get data
@@ -39,7 +59,7 @@ def run_baseline_optimization():
     hypermodel = BaseTCNHyperModel(input_shape=x_train.shape[1:], n_classes=NUM_CLASSES)
 
     # Set output dir
-    output_dir = ".\\modes\\test_tune"
+    output_dir = ".\\models\\test_tune"
 
     # Define a tuner
     tuner = kt.RandomSearch(
@@ -47,7 +67,7 @@ def run_baseline_optimization():
         objective="val_loss",
         max_trials=3,
         executions_per_trial=2,
-        overwrite=True,
+        overwrite=False,
         directory=output_dir,
         project_name='baseline_optim',
     )
@@ -59,7 +79,10 @@ def run_baseline_optimization():
     tuner.search(x_train, y_train, epochs=2, validation_data=(x_val, y_val))
 
     # Query the results
-    best_model = tuner.get_best_models(num_models=1)[0]
+    hps = tuner.oracle.get_best_trials(num_trials=1)[0].hyperparameters
+    # model = build_model(hps)
+    # model.fit(...)
+    best_model = tuner.hypermodel.build(hps)
     best_model.summary()
 
 def run_baseline():
@@ -96,4 +119,4 @@ def run_baseline():
 
 if __name__ == "__main__":
     # run_optimization()
-    run_baseline_optimization()
+    run_optimization()
